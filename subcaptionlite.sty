@@ -29,8 +29,9 @@
 %%     \refstepcounter (with hyperref, the anchor is \theHsub<type>).
 %%   * \begin{subfigure}[<pos>]{<width>} ... \end{subfigure}, and the
 %%     subtable environment
-%%       A minipage, inside which \caption and \caption* mean
-%%       \subcaption and \subcaption*.
+%%       A minipage (<pos> is b by default, as in the subcaption
+%%       package), inside which \caption and \caption* mean \subcaption
+%%       and \subcaption*.
 %%   * \subcaption{<text>} and \subcaption*{<text>}
 %%       Numbered with the counter of the float it is in: subfigure in a
 %%       figure, subtable in a table (also in a subfigure environment).
@@ -101,7 +102,7 @@
   \@namedef{thesub#1}{(\alph{sub#1})}%
   \@namedef{p@sub#1}{\csname the#1\endcsname}%
   \@namedef{theHsub#1}{\csname theH#1\endcsname.\arabic{sub#1}}%
-  \newenvironment{sub#1}[2][c]{%
+  \newenvironment{sub#1}[2][b]{%
     \begin{minipage}[##1]{##2}%
       \let\caption\subcaption
   }{\end{minipage}}%

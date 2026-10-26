@@ -43,7 +43,7 @@ made with it.
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}[b]{.3\linewidth}
+  \begin{subfigure}{.3\linewidth}
     \centering\includegraphics[width=.9\linewidth]{example-image-a}
     \caption{The subfigure environment}\label{fig:example-a}
   \end{subfigure}\hfill
@@ -81,7 +81,7 @@ p\LaTeX{} and up\LaTeX{} (with dvipdfmx).  The package requires
 
 \begin{figure}
   \centering
-  \begin{subfigure}[b]{.3\linewidth}
+  \begin{subfigure}{.3\linewidth}
     \centering\includegraphics[width=.9\linewidth]{example-image-a}
     \caption{The subfigure environment}\label{fig:example-a}
   \end{subfigure}\hfill
@@ -110,10 +110,12 @@ p\LaTeX{} and up\LaTeX{} (with dvipdfmx).  The package requires
 
 \begin{description}
 \item[\texttt{\char`\\begin\{subfigure\}[\meta{pos}]\{\meta{width}\}}, \texttt{\char`\\begin\{subtable\}[\meta{pos}]\{\meta{width}\}}]
-  A \env{minipage} of \meta{width} (\meta{pos}: \texttt{c} by default),
+  A \env{minipage} of \meta{width} (\meta{pos}: \texttt{b} by default,
+  as in \pkg{subcaption}),
   inside which \cs{caption} and \cs{caption*} mean \cs{subcaption} and
   \cs{subcaption*}.  The subcaption is put where \cs{caption} is given:
-  above the contents in \cref{tab:example}.
+  above the contents in \cref{tab:example}, where \texttt{[t]} aligns
+  the subtables at the top.
 \item[\texttt{\char`\\subcaption\{\meta{text}\}}, \texttt{\char`\\subcaption*\{\meta{text}\}}]
   A numbered or unnumbered subcaption, e.g.\ in a \env{minipage}.  It
   is centered and set in \cs{small}.  It is numbered with the counter
@@ -244,7 +246,8 @@ expected error message.
 \begin{description}
 \item[v1.0 (2026/10/26)] First public release.  Support every engine;
   add the \env{subtable} environment, subcaptions in tables and
-  \cs{subref}; fix the figure number when the caption of the figure
+  \cs{subref}; the default position of \env{subfigure} is \texttt{b},
+  as in \pkg{subcaption}; fix the figure number when the caption of the figure
   comes before the subcaptions, and after a figure whose subfigures
   follow its caption.
 \end{description}

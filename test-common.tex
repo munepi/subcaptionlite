@@ -15,6 +15,10 @@
 %% \SCLwd{<want>}{<material>}
 %%   Typeset <material> in an \hbox, check its width (<want> is a
 %%   dimension) and put the box here.
+%% \SCLpos{<env>}{<pos>}
+%%   Check that <env> (subfigure or subtable) without the optional
+%%   argument is aligned as with [<pos>]: compare the height and depth
+%%   of the two boxes (nothing is typeset; use it in a float).
 %% \SCLsep{<kind>}
 %%   Check the width of \subcaption@sep in \subcaption@font: <kind> is
 %%   "kanji" (half the width of a kanji) or "latin" (.5em).
@@ -76,6 +80,13 @@
   \setbox\z@\hbox{#2}%
   \SCL@near{WIDTH}{\wd\z@}{#1}%
   \box\z@}
+\newcommand\SCLpos[2]{%
+  \begingroup
+    \setbox\z@\hbox{\begin{#1}{2cm}\rule{1cm}{1cm}\caption*{X}\end{#1}}%
+    \setbox\tw@\hbox{\begin{#1}[#2]{2cm}\rule{1cm}{1cm}\caption*{X}\end{#1}}%
+    \SCL@near{POS}{\ht\z@}{\ht\tw@}%
+    \SCL@near{POS}{\dp\z@}{\dp\tw@}%
+  \endgroup}
 \newcommand\SCLsep[1]{%
   \begingroup
     \subcaption@font

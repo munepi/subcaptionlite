@@ -37,7 +37,7 @@ Copy `subcaptionlite.sty` to your local TeX tree:
 
 \begin{figure}
   \centering
-  \begin{subfigure}[b]{.45\linewidth}
+  \begin{subfigure}{.45\linewidth}
     \centering\includegraphics[width=\linewidth]{a}
     \caption{The first}\label{fig:a}   % \caption means \subcaption here
   \end{subfigure}\hfill
@@ -50,7 +50,7 @@ Figure~\ref{fig:ab} has two parts, \subref{fig:a} and \subref{fig:b}.
 \begin{table}
   \centering
   \caption{Two subtables}\label{tab:ab}
-  \begin{subtable}{.45\linewidth}
+  \begin{subtable}[t]{.45\linewidth}
     \centering
     \caption{The first}\label{tab:a}
     \begin{tabular}{ll} ... \end{tabular}
@@ -59,7 +59,7 @@ Figure~\ref{fig:ab} has two parts, \subref{fig:a} and \subref{fig:b}.
 \end{table}
 ```
 
-* `\begin{subfigure}[<pos>]{<width>}`, `\begin{subtable}[<pos>]{<width>}`: a minipage, inside which `\caption` and `\caption*` mean `\subcaption` and `\subcaption*`.
+* `\begin{subfigure}[<pos>]{<width>}`, `\begin{subtable}[<pos>]{<width>}`: a minipage (`<pos>`: `b` by default, as in subcaption; give `t` to align subtables with their captions above), inside which `\caption` and `\caption*` mean `\subcaption` and `\subcaption*`.
 * `\subcaption{<text>}`, `\subcaption*{<text>}`: a numbered/unnumbered subcaption, e.g. in a minipage. It is numbered with the counter of the float it is in: `subfigure` in a figure, `subtable` in a table.
 * `\subcaptionbox{<caption>}[<width>]{<contents>}`: `<contents>` centered in a minipage of `<width>` (default: the natural width of `<contents>`; with `<width>`, `\linewidth` in `<contents>` is `<width>`), followed by `\subcaption{<caption>}`. The minipage keeps `<width>` even if `<contents>` is wider.
 * `\subref{<label>}`, `\subref*{<label>}`: only the label of the subfigure/subtable, e.g. `(a)` (`\subref*`: without a link with hyperref). After a numbered subcaption, `\label{<label>}` also writes the label `sub@<label>`, as the subcaption package does.

@@ -12,6 +12,7 @@
 %%
 %% What is covered:
 %%   * the subfigure environment, and \caption/\caption* inside it;
+%%   * the default position of subfigure and subtable is b;
 %%   * \subcaption and \subcaption* in a minipage;
 %%   * \subcaptionbox with and without <width>, with contents wider
 %%     than <width>, and \linewidth in its contents;
@@ -128,6 +129,7 @@
 \begin{figure}[htbp]
   \centering
   \caption{No subfigures}\SCLlabel{6}
+  \SCLpos{subfigure}{b}\SCLcounter{subfigure}{0}
 \end{figure}
 \SCLcounter{figure}{6}
 
@@ -159,6 +161,7 @@
   \centering
   \subcaptionbox{Below\SCLlabel{2(a)}}{%
     \begin{tabular}{l}\hline E\\\hline\end{tabular}}
+  \SCLpos{subtable}{b}\SCLcounter{subtable}{1}
   \caption{Caption below the subtables}\SCLlabel{2}
 \end{table}
 \SCLcounter{table}{2}
