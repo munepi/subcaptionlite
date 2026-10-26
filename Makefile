@@ -26,6 +26,7 @@ subcaptionlite.pdf: subcaptionlite.tex subcaptionlite.sty
 ##    widths and anchors are as expected (see test-common.tex)
 ##  * test-hyperref-*: no warning on a duplicate or missing destination
 ##    in the log or in the output of the engine and (x)dvipdfmx
+##  * test-errors-*: the expected error message
 ## A test is "<engine>:<jobname>:<input>".  The output of the engine and
 ## of (x)dvipdfmx is kept in <jobname>.term.
 TESTS := \
@@ -45,6 +46,11 @@ TESTS := \
   lualatex:test-japanese-late-lualatex:'\def\SCLlatejapanese{}\input test-japanese' \
   platex:test-japanese-platex:'\def\CLS{jsarticle}\input test-japanese' \
   uplatex:test-japanese-uplatex:'\def\CLS{ujarticle}\input test-japanese'
+
+## "<case>:<error message>" of test-errors.tex (pdflatex)
+ERRORS := \
+  outside:"subcaption outside float" \
+  type:"has no subcaptions"
 
 .PHONY: test
 test:
@@ -69,6 +75,13 @@ test:
 	      grep -i 'duplicate\|already defined\|does not exist\|unreferenced destination'; then \
 	      echo "NG: destination warning in $$job.log or $$job.term"; exit 1; fi;; \
 	  esac; \
+	done; \
+	for e in $(ERRORS); do \
+	  c=$${e%%:*}; msg=$${e#*:}; job=test-errors-$$c; \
+	  echo "== pdflatex $$job"; \
+	  pdflatex -interaction=nonstopmode -jobname=$$job "\def\CASE{$$c}\input test-errors" >$$job.term 2>&1 || true; \
+	  grep -q "^! Package subcaptionlite Error: .*$$msg" $$job.log || \
+	    { echo "NG: no expected error in $$job.log"; exit 1; }; \
 	done; \
 	echo "All tests passed ($(SCLVER))"
 

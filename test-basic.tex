@@ -1,7 +1,7 @@
 %% test-basic.tex
 %% ==============
 %% Typesetting test for every engine: the numbering, labels and widths
-%% of the subfigures.
+%% of the subfigures and subtables.
 %%
 %%   pdflatex test-basic.tex   (twice; or xelatex / lualatex)
 %%   platex  -jobname=test-basic "\def\CLS{jarticle}\input test-basic"
@@ -13,13 +13,18 @@
 %% What is covered:
 %%   * the subfigure environment, and \caption/\caption* inside it;
 %%   * \subcaption and \subcaption* in a minipage;
-%%   * \subcaptionbox with and without <width>, and with contents wider
-%%     than <width>;
+%%   * \subcaptionbox with and without <width>, with contents wider
+%%     than <width>, and \linewidth in its contents;
 %%   * the caption of the figure below the subfigures, above them, and
 %%     no caption at all: the figure number of the subfigures, and the
 %%     number of the figures that follow;
 %%   * figure*, and \captionsetup (ignored);
-%%   * \ref to a figure and to subfigures;
+%%   * the subtable environment and \subcaptionbox in a table, with the
+%%     caption of the table above or below; a figure after the tables;
+%%   * \subcaption directly in the body of a figure;
+%%   * \ref to figures, tables, subfigures and subtables; \subref and
+%%     \subref* (only the label of the subfigure/subtable), and no
+%%     sub@ label for a figure or a table;
 %%   * \@makecaption of the class is not changed;
 %%   * the width of \subcaption@sep (.5em, or .5zw with a Japanese
 %%     class).
@@ -94,7 +99,9 @@
   \SCLwd{2cm}{\subcaptionbox{Narrower than its contents\SCLlabel{3(b)}}[2cm]{%
       \SCLimage{3cm}{1cm}}}\hfill
   \SCLwd{3cm}{\subcaptionbox{Natural width\SCLlabel{3(c)}}{%
-      \rule{3cm}{1cm}}}
+      \rule{3cm}{1cm}}}\hfill
+  \SCLwd{4cm}{\subcaptionbox{Linewidth is the width\SCLlabel{3(d)}}[4cm]{%
+      \SCLwd{2cm}{\rule{.5\linewidth}{1cm}}}}
   \caption{Subcaptionbox}\SCLlabel{3}
 \end{figure}
 \SCLcounter{figure}{3}
@@ -131,7 +138,51 @@
 \end{figure}
 \SCLcounter{figure}{7}
 
+\section*{Subtables}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Caption above the subtables}\SCLlabel{1}\label{tab:first}
+  \begin{subtable}{.45\linewidth}
+    \centering
+    \caption{First}\SCLlabel{1(a)}\SCLhref{subtable.1.1}%
+    \SCLcreftype{subtable}\label{tab:first-a}
+    \begin{tabular}{ll}\hline A & B\\\hline\end{tabular}
+  \end{subtable}\hfill
+  \subcaptionbox{Second\SCLlabel{1(b)}\label{tab:first-b}}{%
+    \begin{tabular}{ll}\hline C & D\\\hline\end{tabular}}
+\end{table}
+\SCLcounter{table}{1}
+\SCLcounter{figure}{7}
+
+\begin{table}[htbp]
+  \centering
+  \subcaptionbox{Below\SCLlabel{2(a)}}{%
+    \begin{tabular}{l}\hline E\\\hline\end{tabular}}
+  \caption{Caption below the subtables}\SCLlabel{2}
+\end{table}
+\SCLcounter{table}{2}
+
+\begin{figure}[htbp]
+  \centering
+  \SCLimage{2cm}{1cm}
+  \subcaption{Directly in the figure}\SCLlabel{8(a)}\label{fig:eighth-a}
+  \caption{After the tables}\SCLlabel{8}\label{fig:eighth}
+\end{figure}
+\SCLcounter{figure}{8}
+\SCLcounter{table}{2}
+
+\section*{References}
+
 See figure~\ref{fig:first}, subfigure~\ref{fig:first-a} and
-subfigure~\ref{fig:fifth-a}.
+subfigure~\ref{fig:fifth-a}; table~\ref{tab:first}, subtables
+\ref{tab:first-a} and~\subref{tab:first-b}.
 \SCLref{fig:first}{1}\SCLref{fig:first-a}{1(a)}\SCLref{fig:fifth-a}{5(a)}
+\SCLref{tab:first}{1}\SCLref{tab:first-a}{1(a)}\SCLref{tab:first-b}{1(b)}
+\SCLref{fig:eighth-a}{8(a)}\SCLref{fig:eighth}{8}
+
+Subref: \subref{fig:first-a}, \subref*{fig:fifth-a}.
+\SCLref{sub@fig:first-a}{(a)}\SCLref{sub@fig:fifth-a}{(a)}
+\SCLref{sub@tab:first-b}{(b)}\SCLref{sub@fig:eighth-a}{(a)}
+\SCLnoref{sub@fig:first}\SCLnoref{sub@tab:first}\SCLnoref{sub@fig:eighth}
 \end{document}

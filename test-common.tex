@@ -10,6 +10,8 @@
 %%   Check the value of <counter> here.
 %% \SCLref{<label>}{<want>}
 %%   Check the number of <label> that \ref gives (needs a second run).
+%% \SCLnoref{<label>}
+%%   Check that <label> is not defined (needs a second run).
 %% \SCLwd{<want>}{<material>}
 %%   Typeset <material> in an \hbox, check its width (<want> is a
 %%   dimension) and put the box here.
@@ -68,6 +70,8 @@
     {\edef\SCL@tmp{\expandafter\expandafter\expandafter\@car
        \csname r@#1\endcsname\@nil}%
      \SCL@cmp{REF}{\SCL@tmp}{#2}}}
+\newcommand\SCLnoref[1]{%
+  \@ifundefined{r@#1}{\SCL@ok{NOREF}{#1}}{\SCL@ng{NOREF}{#1 defined}}}
 \newcommand\SCLwd[2]{%
   \setbox\z@\hbox{#2}%
   \SCL@near{WIDTH}{\wd\z@}{#1}%

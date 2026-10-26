@@ -1,8 +1,8 @@
 %%
 %% subcaptionlite.sty
 %% ==================
-%% Minimal subfigure environment, \subcaption and \subcaptionbox without
-%% the caption package.
+%% Minimal subfigure/subtable environments, \subcaption, \subcaptionbox
+%% and \subref without the caption package.
 %%
 %% Copyright (c) 2026 Munehiro Yamamoto <munepixyz@gmail.com>
 %%
@@ -18,34 +18,48 @@
 %%   The subcaption package needs the caption package, which redefines
 %%   \@makecaption of the class.  Thus it cannot be used with a class
 %%   that has its own design of captions.  This package provides the
-%%   subfigure environment, \subcaption and \subcaptionbox without
-%%   touching \@makecaption of the class; \caption is only wrapped for
-%%   the numbering (see below).
+%%   subfigure and subtable environments, \subcaption, \subcaptionbox
+%%   and \subref without touching \@makecaption of the class; \caption
+%%   is only wrapped for the numbering (see below).
 %%
-%% What it provides
-%%   * The counter subfigure, reset by figure.  \thesubfigure is (a),
-%%     (b), ...; \p@subfigure is \thefigure, so that \ref gives "4.2(a)"
+%% What it provides (<type> is figure or table)
+%%   * The counter sub<type>, reset by <type>.  \thesub<type> is (a),
+%%     (b), ...; \p@sub<type> is \the<type>, so that \ref gives "4.2(a)"
 %%     (and \Cref of cleveref "Figure 4.2(a)").  \label works through
-%%     \refstepcounter (with hyperref, the anchor is \theHsubfigure).
-%%   * \begin{subfigure}[<pos>]{<width>} ... \end{subfigure}
+%%     \refstepcounter (with hyperref, the anchor is \theHsub<type>).
+%%   * \begin{subfigure}[<pos>]{<width>} ... \end{subfigure}, and the
+%%     subtable environment
 %%       A minipage, inside which \caption and \caption* mean
 %%       \subcaption and \subcaption*.
 %%   * \subcaption{<text>} and \subcaption*{<text>}
+%%       Numbered with the counter of the float it is in: subfigure in a
+%%       figure, subtable in a table (also in a subfigure environment).
 %%   * \subcaptionbox{<caption>}[<width>]{<contents>}
 %%       Puts <contents> centered in a minipage of <width>, followed by
 %%       \subcaption{<caption>}.  Without <width>, the natural width of
-%%       <contents> is used.  If <contents> is wider than <width>, the
-%%       minipage keeps <width>.
+%%       <contents> is used; with <width>, \linewidth in <contents> is
+%%       <width>.  If <contents> is wider than <width>, the minipage
+%%       keeps <width>.
+%%   * \subref{<label>} and \subref*{<label>} (no link with hyperref)
+%%       Only the label of the subfigure/subtable, e.g. "(a)": after a
+%%       numbered \subcaption, \label{<label>} also writes the label
+%%       sub@<label>, as the subcaption package does.
 %%   * \captionsetup[..]{..}: a no-op, so that the settings for the
 %%     caption package can be left in the document.
 %%
 %% Numbering
-%%   When a \subcaption comes before the \caption of its figure (the
-%%   usual way), the first \subcaption steps the figure counter in
-%%   advance, and the \caption that follows does not step it again (as
-%%   the subcaption package does; otherwise the subfigures would get the
-%%   number of the previous figure).  When the \caption comes first, the
-%%   \subcaption uses its number.
+%%   When a \subcaption comes before the \caption of its float (the
+%%   usual way for figures), the first \subcaption steps the counter of
+%%   the float in advance, and the \caption that follows does not step
+%%   it again (as the subcaption package does; otherwise the subfigures
+%%   would get the number of the previous figure).  When the \caption
+%%   comes first (the usual way for tables), the \subcaption uses its
+%%   number.
+%%
+%% Errors
+%%   \subcaption (and \subcaptionbox) outside a float, or in a float
+%%   other than figure and table: the subcaption is typeset without a
+%%   number.
 %%
 %% Customization (redefine in the class or a local style)
 %%   \subcaption@font   the font of a subcaption (default: \small)
@@ -61,21 +75,38 @@
 %%   * pLaTeX, upLaTeX (+ dvipdfmx)
 %%
 %% Limitations
-%%   * Subcaptions are for figures only: there is no subtable.
+%%   * Subcaptions are for figures and tables only.
+%%   * The package cannot be used together with the caption or
+%%     subcaption package.
 %%
 \NeedsTeXFormat{LaTeX2e}[2020-10-01]
 \ProvidesPackage{subcaptionlite}
-  [2026/10/26 v1.0 minimal subfigure/subcaption without the caption package]
+  [2026/10/26 v1.0 minimal subfigures/subtables without the caption package]
 
 \RequirePackage{etoolbox}%% \AtBeginEnvironment
 
 \newbox\subcaption@box
 \newdimen\subcaption@dim
 
-\newcounter{subfigure}[figure]
-\renewcommand{\thesubfigure}{(\alph{subfigure})}
-\def\p@subfigure{\thefigure}
-\def\theHsubfigure{\theHfigure.\arabic{subfigure}}
+\newcommand*\subcaption@Error[1]{%
+  \PackageError{subcaptionlite}{#1}{%
+    \string\subcaption\space and \string\subcaptionbox\space can be used
+    in a figure or a table.\MessageBreak
+    The subcaption is typeset without a number.}}
+
+%% \subcaption@declare{<type>}: the counter sub<type>, reset by <type>,
+%% and the environment sub<type>; for figure and table
+\def\subcaption@declare#1{%
+  \newcounter{sub#1}[#1]%
+  \@namedef{thesub#1}{(\alph{sub#1})}%
+  \@namedef{p@sub#1}{\csname the#1\endcsname}%
+  \@namedef{theHsub#1}{\csname theH#1\endcsname.\arabic{sub#1}}%
+  \newenvironment{sub#1}[2][c]{%
+    \begin{minipage}[##1]{##2}%
+      \let\caption\subcaption
+  }{\end{minipage}}%
+  \AtBeginEnvironment{#1}{\subcaption@reset{#1}}%
+  \AtBeginEnvironment{#1*}{\subcaption@reset{#1}}}
 
 %% Half of the full-width character: zw is a unit of pTeX; LuaTeX-ja
 %% (and some classes) define \zw.  Decided when used, so that LuaTeX-ja
@@ -86,25 +117,24 @@
 \providecommand*\subcaption@sep{\hspace{\subcaption@halfzw}}
 \providecommand*\subcaption@skip{\vskip.25\baselineskip}
 
-%% With hyperref, step the figure counter in advance with
+%% With hyperref, step the counter of the float in advance with
 %% \H@refstepcounter, which makes no anchor
-\def\subcaption@precount@figure{%
+\def\subcaption@precount{%
   \@ifundefined{H@refstepcounter}{\refstepcounter}{\H@refstepcounter}{\@captype}}
 
-%% precounted: a \subcaption has stepped the figure counter in advance;
-%% captioned:  the \caption of the figure has been given
+%% precounted: a \subcaption has stepped the counter of the float in
+%%             advance;
+%% captioned:  the \caption of the float has been given
 \newif\if@subcaption@precounted
 \newif\if@subcaption@captioned
-%% The subfigure counter is reset here too: it is reset by the figure
-%% counter, which is not stepped before the first \subcaption
-\def\subcaption@reset{%
+%% The counter sub<type> is reset here too: it is reset by the counter
+%% <type>, which is not stepped before the first \subcaption
+\def\subcaption@reset#1{%
   \global\@subcaption@precountedfalse
   \global\@subcaption@captionedfalse
-  \setcounter{subfigure}{0}}
-\AtBeginEnvironment{figure}{\subcaption@reset}
-\AtBeginEnvironment{figure*}{\subcaption@reset}
-\AtBeginEnvironment{table}{\subcaption@reset}
-\AtBeginEnvironment{table*}{\subcaption@reset}
+  \setcounter{sub#1}{0}}
+\@ifundefined{c@figure}{}{\subcaption@declare{figure}}
+\@ifundefined{c@table}{}{\subcaption@declare{table}}
 
 %% \caption is wrapped at the end of \begin{document}, after hyperref and
 %% the like have defined it
@@ -116,34 +146,69 @@
       \addtocounter{\@captype}{\m@ne}%
     \fi
     \global\@subcaption@captionedtrue
+    \ifx\label\subcaption@label \let\label\subcaption@ORI@label \fi
     \subcaption@saved@caption}}
 
 \newcommand*\subcaption{\@ifstar\subcaption@star\subcaption@nostar}
-\newcommand\subcaption@nostar[1]{%
+\newcommand\subcaption@nostar{\subcaption@iftype\subcaption@numbered\subcaption@star}
+\newcommand\subcaption@numbered[1]{%
   \if@subcaption@precounted\else\if@subcaption@captioned\else
     \global\@subcaption@precountedtrue
-    \subcaption@precount@figure
+    \subcaption@precount
   \fi\fi
-  \refstepcounter{subfigure}%
-  \subcaption@typeset{\thesubfigure\subcaption@sep}{#1}}
+  \refstepcounter{sub\@captype}%
+  \ifx\label\subcaption@label \else
+    \let\subcaption@ORI@label\label
+    \let\label\subcaption@label
+  \fi
+  \subcaption@typeset{\csname thesub\@captype\endcsname\subcaption@sep}{#1}}
+%% \subcaption@iftype{<true>}{<false>}: in a float that has subcaptions?
+\def\subcaption@iftype{%
+  \ifx\@captype\@undefined
+    \subcaption@Error{\string\subcaption\space outside float}%
+    \expandafter\@secondoftwo
+  \else
+    \expandafter\subcaption@iftype@
+  \fi}
+\def\subcaption@iftype@{%
+  \@ifundefined{c@sub\@captype}%
+    {\subcaption@Error{Float type `\@captype' has no subcaptions}%
+     \@secondoftwo}%
+    {\@firstoftwo}}
 \newcommand\subcaption@star[1]{\subcaption@typeset{}{#1}}
 \newcommand\subcaption@typeset[2]{%
   \par\subcaption@skip
   {\centering\subcaption@font\ifdefined\inhibitglue\inhibitglue\fi#1#2\par}}
 
-\newenvironment{subfigure}[2][c]{%
-  \begin{minipage}[#1]{#2}%
-    \let\caption\subcaption
-}{\end{minipage}}
+%% After a numbered \subcaption, \label also writes the label
+%% sub@<label> with \thesub<type> only, for \subref (as the subcaption
+%% package does).  #1 is the optional argument of cleveref, if any.
+\def\subcaption@label#1#{\subcaption@@label{#1}}
+\def\subcaption@@label#1#2{%
+  \@bsphack\begingroup
+    \let\@bsphack\relax
+    \let\@esphack\relax
+    \subcaption@ORI@label#1{#2}%
+    \let\SK@\@gobbletwo%% showkeys
+    \protected@edef\@currentlabel{\csname thesub\@captype\endcsname}%
+    \subcaption@ORI@label{sub@#2}%
+  \endgroup\@esphack}
+\DeclareRobustCommand*\subref{\@ifstar\subcaption@ref@star\subcaption@ref}
+\def\subcaption@ref#1{\ref{sub@#1}}
+\def\subcaption@ref@star#1{%
+  \@ifundefined{hyperref}{\ref{sub@#1}}{\ref*{sub@#1}}}
 
 %% \subcaptionbox{caption}[width]{contents}
 \NewDocumentCommand\subcaptionbox{ m O{} m }{%
   \begingroup
-    \setbox\subcaption@box\hbox{#3}%
     \if\relax\detokenize{#2}\relax
+      \setbox\subcaption@box\hbox{#3}%
       \subcaption@dim\wd\subcaption@box
     \else
+      %% with a width, \linewidth in contents is the width (as in the
+      %% subcaption package)
       \subcaption@dim#2\relax
+      \setbox\subcaption@box\hbox{\linewidth\subcaption@dim #3}%
     \fi
     \begin{minipage}[b]{\subcaption@dim}%
       %% put contents in an \hsize-wide hbox, so that the minipage does

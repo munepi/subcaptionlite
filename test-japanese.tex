@@ -1,7 +1,7 @@
 %% test-japanese.tex
 %% =================
-%% Typesetting test for the Japanese classes: subcaptions in Japanese,
-%% and the space between the label and the text (.5zw).
+%% Typesetting test for the Japanese classes: subfigures and subtables
+%% in Japanese, and the space between the label and the text (.5zw).
 %%
 %%   lualatex test-japanese.tex   (twice)
 %%   platex  -jobname=test-japanese "\def\CLS{jsarticle}\input test-japanese"
@@ -54,4 +54,20 @@
   \subcaptionbox{自然幅\SCLlabel{2(b)}}{\SCLimage{3cm}{2cm}}
 \end{figure}
 \SCLcounter{figure}{2}
+
+表~\ref{tab:ja}は副表\subref{tab:ja-a}と\subref{tab:ja-b}からなります。
+\SCLref{tab:ja}{1}\SCLref{sub@tab:ja-a}{(a)}\SCLref{sub@tab:ja-b}{(b)}
+
+\begin{table}[htbp]
+  \centering
+  \caption{日本語の副表}\SCLlabel{1}\label{tab:ja}
+  \begin{subtable}{.45\linewidth}
+    \centering
+    \caption{左の表}\SCLlabel{1(a)}\label{tab:ja-a}
+    \begin{tabular}{ll}\hline 項目 & 値\\\hline\end{tabular}
+  \end{subtable}\hfill
+  \subcaptionbox{右の表\SCLlabel{1(b)}\label{tab:ja-b}}[.45\linewidth]{%
+    \begin{tabular}{ll}\hline 項目 & 値\\\hline\end{tabular}}
+\end{table}
+\SCLcounter{table}{1}
 \end{document}

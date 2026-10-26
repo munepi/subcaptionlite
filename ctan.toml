@@ -4,20 +4,21 @@
 
 pkg         = "subcaptionlite"
 ctanPath    = "/macros/latex/contrib/subcaptionlite"
-summary     = "Subfigures and subcaptions without the caption package"
+summary     = "Subfigures and subtables without the caption package"
 description = '''
 <p>
 The subcaption package needs the caption package, which redefines
 <code>\@makecaption</code> of the class; thus it cannot be used with a
 class that has its own design of captions.  This package provides the
-<code>subfigure</code> environment, <code>\subcaption</code> and
-<code>\subcaptionbox</code> without touching <code>\@makecaption</code>
-of the class.
+<code>subfigure</code> and <code>subtable</code> environments,
+<code>\subcaption</code>, <code>\subcaptionbox</code> and
+<code>\subref</code> with the same syntax as subcaption, without
+touching <code>\@makecaption</code> of the class.
 </p>
 <p>
-Subfigures are numbered (a), (b), ... within each figure, and
-<code>\ref</code> gives e.g. 4.2(a).  The figure number is right
-whether the caption of the figure comes before or after the
+Subfigures and subtables are numbered (a), (b), ... within each figure
+or table, and <code>\ref</code> gives e.g. 4.2(a).  The number of the
+float is right whether its caption comes before or after the
 subcaptions.  hyperref and cleveref are supported, and
 <code>\captionsetup</code> is accepted and ignored.  The font and the
 spaces of the subcaptions can be changed by redefining three macros;

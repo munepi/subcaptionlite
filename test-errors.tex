@@ -1,0 +1,38 @@
+%% test-errors.tex
+%% ===============
+%% The errors of subcaptionlite.  Run with -interaction=nonstopmode and
+%% select the case by \CASE:
+%%
+%%   pdflatex -interaction=nonstopmode -jobname=test-errors-outside \
+%%     "\def\CASE{outside}\input test-errors"
+%%
+%% Cases and the error message to find in the log:
+%%   outside  \subcaption outside a float:
+%%            "\subcaption outside float"
+%%   type     \subcaption in a float type without subcaptions (a float
+%%            "listing" defined with \@float):
+%%            "Float type `listing' has no subcaptions"
+\ifdefined\CASE\else\def\CASE{outside}\fi
+\documentclass{article}
+\usepackage{subcaptionlite}
+\makeatletter
+\newcounter{listing}
+\def\fps@listing{tbp}
+\def\ftype@listing{4}
+\def\ext@listing{lol}
+\def\fnum@listing{Listing~\thelisting}
+\newenvironment{listing}{\@float{listing}}{\end@float}
+\makeatother
+\def\SCLcase#1{\def\SCLtmp{#1}\ifx\SCLtmp\CASE}
+\begin{document}
+\SCLcase{outside}
+  \subcaption{Outside a float}
+\fi
+\SCLcase{type}
+  \begin{listing}
+    \subcaptionbox{In a listing}{Text}
+    \caption{A listing}
+  \end{listing}
+\fi
+Text.
+\end{document}
