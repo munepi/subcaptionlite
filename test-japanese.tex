@@ -1,0 +1,57 @@
+%% test-japanese.tex
+%% =================
+%% Typesetting test for the Japanese classes: subcaptions in Japanese,
+%% and the space between the label and the text (.5zw).
+%%
+%%   lualatex test-japanese.tex   (twice)
+%%   platex  -jobname=test-japanese "\def\CLS{jsarticle}\input test-japanese"
+%%   uplatex -jobname=test-japanese "\def\CLS{ujarticle}\input test-japanese"
+%%   (then dvipdfmx test-japanese)
+%% The class is ltjsarticle by default; with pTeX the class option
+%% dvipdfmx is given.  With \def\SCLlatejapanese{}, the class is
+%% article and LuaTeX-ja is loaded after subcaptionlite (LuaLaTeX only):
+%%   lualatex -jobname=test-japanese-late \
+%%     "\def\SCLlatejapanese{}\input test-japanese"
+%%
+%% What to check:
+%%   * SCL-RESULT OK, and no error or warning.
+%%   * In the PDF, the subcaptions are centered under the images, with
+%%     a half-width space after (a), (b), ...
+\ifdefined\SCLlatejapanese\def\CLS{article}\fi
+\ifdefined\CLS\else\def\CLS{ltjsarticle}\fi
+\ifdefined\ptexversion\def\CLSOPT{dvipdfmx}\else\def\CLSOPT{}\fi
+\expandafter\documentclass\expandafter[\CLSOPT]{\CLS}
+\input{test-common}
+\usepackage{subcaptionlite}
+\ifdefined\SCLlatejapanese\usepackage{luatexja}\fi
+\begin{document}
+\section*{副図のテスト}
+
+\SCLsep{kanji}
+
+図~\ref{fig:ja}の左が\ref{fig:ja-a}、右が\ref{fig:ja-b}です。
+\SCLref{fig:ja}{1}\SCLref{fig:ja-a}{1(a)}\SCLref{fig:ja-b}{1(b)}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{.45\linewidth}
+    \centering\SCLimage{3cm}{2cm}
+    \caption{左の図}\SCLlabel{1(a)}\label{fig:ja-a}
+  \end{subfigure}\hfill
+  \begin{subfigure}{.45\linewidth}
+    \centering\SCLimage{3cm}{2cm}
+    \caption{「かぎ括弧」で始まる副図の見出し}\SCLlabel{1(b)}\label{fig:ja-b}
+  \end{subfigure}
+  \caption{日本語の副図}\SCLlabel{1}\label{fig:ja}
+\end{figure}
+\SCLcounter{figure}{1}
+
+\begin{figure}[htbp]
+  \centering
+  \caption{上に置いた図の見出し}\SCLlabel{2}
+  \subcaptionbox{副図の見出しが幅より長い場合は折り返されます\SCLlabel{2(a)}}[.3\linewidth]{%
+    \SCLimage{3cm}{2cm}}\hfill
+  \subcaptionbox{自然幅\SCLlabel{2(b)}}{\SCLimage{3cm}{2cm}}
+\end{figure}
+\SCLcounter{figure}{2}
+\end{document}

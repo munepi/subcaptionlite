@@ -1,0 +1,137 @@
+%% test-basic.tex
+%% ==============
+%% Typesetting test for every engine: the numbering, labels and widths
+%% of the subfigures.
+%%
+%%   pdflatex test-basic.tex   (twice; or xelatex / lualatex)
+%%   platex  -jobname=test-basic "\def\CLS{jarticle}\input test-basic"
+%%   (then dvipdfmx test-basic)
+%% The class is article by default; set \CLS for another one (jarticle,
+%% ujarticle, ltjsarticle, ...).  With pTeX the class option dvipdfmx
+%% is given.
+%%
+%% What is covered:
+%%   * the subfigure environment, and \caption/\caption* inside it;
+%%   * \subcaption and \subcaption* in a minipage;
+%%   * \subcaptionbox with and without <width>, and with contents wider
+%%     than <width>;
+%%   * the caption of the figure below the subfigures, above them, and
+%%     no caption at all: the figure number of the subfigures, and the
+%%     number of the figures that follow;
+%%   * figure*, and \captionsetup (ignored);
+%%   * \ref to a figure and to subfigures;
+%%   * \@makecaption of the class is not changed;
+%%   * the width of \subcaption@sep (.5em, or .5zw with a Japanese
+%%     class).
+%%
+%% test-hyperref.tex runs this file with hyperref and cleveref.
+%%
+%% What to check:
+%%   * SCL-RESULT OK, and no error or warning.
+\ifdefined\CLS\else\def\CLS{article}\fi
+\ifdefined\ptexversion\def\CLSOPT{dvipdfmx}\else\def\CLSOPT{}\fi
+\expandafter\documentclass\expandafter[\CLSOPT]{\CLS}
+%% a class with its own design of captions
+\makeatletter
+\long\def\@makecaption#1#2{%
+  \vskip\abovecaptionskip
+  \centering\textbf{#1.}\enspace#2\par}
+\makeatother
+\input{test-common}
+\ifdefined\SCLhyperfirst\usepackage{hyperref}\fi
+\usepackage{subcaptionlite}
+\ifdefined\SCLhyperref
+  \ifdefined\SCLhyperfirst\else\usepackage{hyperref}\fi
+  \usepackage{cleveref}
+\fi
+\captionsetup[figure]{labelfont=bf}
+\ifdefined\ptexversion\def\SCLkind{kanji}\else
+  \ifdefined\ltjsetparameter\def\SCLkind{kanji}\else\def\SCLkind{latin}\fi
+\fi
+\begin{document}
+\section*{Subfigures}
+
+\SCLsep{\SCLkind}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{.3\linewidth}
+    \centering\SCLimage{2cm}{1.5cm}
+    \caption{First}\SCLlabel{1(a)}\SCLhref{subfigure.1.1}%
+    \SCLcreftype{subfigure}\label{fig:first-a}
+  \end{subfigure}\hfill
+  \begin{subfigure}{.3\linewidth}
+    \centering\SCLimage{2cm}{1.5cm}
+    \caption{Second}\SCLlabel{1(b)}\SCLhref{subfigure.1.2}
+  \end{subfigure}\hfill
+  \begin{subfigure}{.3\linewidth}
+    \centering\SCLimage{2cm}{1.5cm}
+    \caption*{Unnumbered}\SCLcounter{subfigure}{2}
+  \end{subfigure}
+  \caption{Caption below the subfigures}\SCLlabel{1}\label{fig:first}
+\end{figure}
+\SCLcounter{figure}{1}
+
+\begin{figure}[htbp]
+  \centering
+  \caption{Caption above the subfigures}\SCLlabel{2}
+  \SCLcounter{subfigure}{0}
+  \begin{minipage}{.4\linewidth}
+    \centering\SCLimage{2cm}{1cm}
+    \subcaption{By subcaption}\SCLlabel{2(a)}
+  \end{minipage}\hfill
+  \begin{minipage}{.4\linewidth}
+    \centering\SCLimage{2cm}{1cm}
+    \subcaption*{By subcaption*}\SCLcounter{subfigure}{1}
+  \end{minipage}
+\end{figure}
+\SCLcounter{figure}{2}
+
+\begin{figure}[htbp]
+  \centering
+  \SCLwd{4cm}{\subcaptionbox{With width\SCLlabel{3(a)}}[4cm]{%
+      \SCLimage{2cm}{1cm}}}\hfill
+  \SCLwd{2cm}{\subcaptionbox{Narrower than its contents\SCLlabel{3(b)}}[2cm]{%
+      \SCLimage{3cm}{1cm}}}\hfill
+  \SCLwd{3cm}{\subcaptionbox{Natural width\SCLlabel{3(c)}}{%
+      \rule{3cm}{1cm}}}
+  \caption{Subcaptionbox}\SCLlabel{3}
+\end{figure}
+\SCLcounter{figure}{3}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[t]{.45\linewidth}
+    \centering\SCLimage{2cm}{1cm}
+    \caption{No caption for the figure}\SCLlabel{4(a)}
+  \end{subfigure}
+\end{figure}
+\SCLcounter{figure}{4}
+
+\begin{figure*}[htbp]
+  \centering
+  \begin{subfigure}{.3\linewidth}
+    \centering\SCLimage{2cm}{1cm}
+    \caption{In figure*}\SCLlabel{5(a)}\label{fig:fifth-a}
+  \end{subfigure}
+  \caption{A figure*}\SCLlabel{5}
+\end{figure*}
+\SCLcounter{figure}{5}
+
+\begin{figure}[htbp]
+  \centering
+  \caption{No subfigures}\SCLlabel{6}
+\end{figure}
+\SCLcounter{figure}{6}
+
+\begin{figure}[htbp]
+  \centering
+  \subcaptionbox{After\SCLlabel{7(a)}\SCLhref{subfigure.7.1}}{\SCLimage{2cm}{1cm}}
+  \caption{The last figure}\SCLlabel{7}
+\end{figure}
+\SCLcounter{figure}{7}
+
+See figure~\ref{fig:first}, subfigure~\ref{fig:first-a} and
+subfigure~\ref{fig:fifth-a}.
+\SCLref{fig:first}{1}\SCLref{fig:first-a}{1(a)}\SCLref{fig:fifth-a}{5(a)}
+\end{document}

@@ -1,0 +1,18 @@
+%% test-hyperref.tex
+%% =================
+%% test-basic.tex with hyperref and cleveref: the anchors of the
+%% subfigures, the type for \cref, and no duplicate destinations.
+%%
+%%   pdflatex test-hyperref.tex   (twice; or xelatex / lualatex)
+%%   platex  -jobname=test-hyperref "\def\CLS{jarticle}\input test-hyperref"
+%%   (then dvipdfmx test-hyperref)
+%% hyperref is loaded after subcaptionlite; with \def\SCLhyperfirst{},
+%% before it:
+%%   pdflatex -jobname=test-hyperref-first \
+%%     "\def\SCLhyperfirst{}\input test-hyperref"
+%%
+%% What to check:
+%%   * SCL-RESULT OK, and no error or warning (no duplicate or missing
+%%     destination, in the log and in the output of (x)dvipdfmx).
+\def\SCLhyperref{}
+\input{test-basic}

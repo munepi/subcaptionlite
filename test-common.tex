@@ -1,0 +1,117 @@
+%% test-common.tex
+%% ===============
+%% Helpers shared by the test files; \input this file right after
+%% \documentclass, before \usepackage{subcaptionlite}.
+%%
+%% \SCLlabel{<want>}
+%%   Check the label that \label would write here (\@currentlabel), e.g.
+%%   "1(a)" for a subfigure or "1" for a figure.
+%% \SCLcounter{<counter>}{<value>}
+%%   Check the value of <counter> here.
+%% \SCLref{<label>}{<want>}
+%%   Check the number of <label> that \ref gives (needs a second run).
+%% \SCLwd{<want>}{<material>}
+%%   Typeset <material> in an \hbox, check its width (<want> is a
+%%   dimension) and put the box here.
+%% \SCLsep{<kind>}
+%%   Check the width of \subcaption@sep in \subcaption@font: <kind> is
+%%   "kanji" (half the width of a kanji) or "latin" (.5em).
+%% \SCLhref{<want>}
+%%   With hyperref, check the anchor of the last \refstepcounter
+%%   (\@currentHref); without hyperref, do nothing.
+%% \SCLcreftype{<type>}
+%%   With cleveref, check the type of the last \refstepcounter for
+%%   \cref; without cleveref, do nothing.
+%% \@makecaption of the class is saved when this file is read; at the
+%% end of \begin{document}, it is checked to be unchanged.
+%%
+%% Each check logs "SCL-<kind> OK: ..." or "SCL-<kind> NG: ...".  At
+%% \end{document}, "SCL-RESULT OK (<n> checks)" or "SCL-RESULT NG" is
+%% logged.  Run twice, for \SCLref.
+\makeatletter
+\newcount\SCL@nchecks
+\newif\ifSCL@ng
+\def\SCL@ok#1#2{\global\advance\SCL@nchecks\@ne\typeout{SCL-#1 OK: #2}}
+\def\SCL@ng#1#2{\global\advance\SCL@nchecks\@ne\global\SCL@ngtrue
+  \typeout{SCL-#1 NG: #2}}
+%% \SCL@cmp{<kind>}{<got>}{<want>}: compare two strings
+\def\SCL@cmp#1#2#3{%
+  \edef\SCL@got{\detokenize\expandafter{#2}}%
+  \edef\SCL@want{\detokenize{#3}}%
+  \ifx\SCL@got\SCL@want
+    \SCL@ok{#1}{\SCL@got}%
+  \else
+    \SCL@ng{#1}{got \SCL@got, want \SCL@want}%
+  \fi}
+%% \SCL@near{<kind>}{<got>}{<want>}: compare two dimensions (0.01pt)
+\def\SCL@near#1#2#3{%
+  \begingroup
+    \dimen@=\dimexpr#2-(#3)\relax
+    \ifdim\dimen@<\z@ \dimen@=-\dimen@ \fi
+    \dimen2=#2\relax \dimen4=#3\relax
+    \ifdim\dimen@<0.01pt
+      \SCL@ok{#1}{\the\dimen2}%
+    \else
+      \SCL@ng{#1}{got \the\dimen2, want \the\dimen4}%
+    \fi
+  \endgroup}
+
+\newcommand\SCLlabel[1]{%
+  \protected@edef\SCL@tmp{\@currentlabel}%
+  \SCL@cmp{LABEL}{\SCL@tmp}{#1}}
+\newcommand\SCLcounter[2]{%
+  \edef\SCL@tmp{\number\value{#1}}%
+  \SCL@cmp{COUNTER}{\SCL@tmp}{#2}}
+\newcommand\SCLref[2]{%
+  \@ifundefined{r@#1}%
+    {\SCL@ng{REF}{#1 undefined}}%
+    {\edef\SCL@tmp{\expandafter\expandafter\expandafter\@car
+       \csname r@#1\endcsname\@nil}%
+     \SCL@cmp{REF}{\SCL@tmp}{#2}}}
+\newcommand\SCLwd[2]{%
+  \setbox\z@\hbox{#2}%
+  \SCL@near{WIDTH}{\wd\z@}{#1}%
+  \box\z@}
+\newcommand\SCLsep[1]{%
+  \begingroup
+    \subcaption@font
+    \setbox\z@\hbox{\subcaption@sep}%
+    \edef\SCL@tmp{#1}\def\SCL@kanji{kanji}%
+    \ifx\SCL@tmp\SCL@kanji
+      \setbox\tw@\hbox{漢}%
+      \dimen@=.5\wd\tw@
+    \else
+      \dimen@=.5em
+    \fi
+    \SCL@near{SEP}{\wd\z@}{\dimen@}%
+  \endgroup}
+\newcommand\SCLhref[1]{%
+  \ifdefined\hyper@anchor
+    \SCL@cmp{HREF}{\@currentHref}{#1}%
+  \fi}
+\def\SCL@creftype[#1]#2\@nil{#1}
+\newcommand\SCLcreftype[1]{%
+  \ifdefined\cref@currentlabel
+    \edef\SCL@tmp{\expandafter\SCL@creftype\cref@currentlabel\@nil}%
+    \SCL@cmp{CREF}{\SCL@tmp}{#1}%
+  \fi}
+\let\SCL@makecaption\@makecaption
+\AddToHook{begindocument/end}{%
+  \ifx\@makecaption\SCL@makecaption
+    \SCL@ok{MAKECAPTION}{unchanged}%
+  \else
+    \SCL@ng{MAKECAPTION}{changed}%
+  \fi}
+
+\AddToHook{enddocument/afterlastpage}{%
+  \ifnum\SCL@nchecks=\z@ \SCL@ng{RESULT}{no checks}\fi
+  \ifSCL@ng
+    \typeout{SCL-RESULT NG}%
+  \else
+    \typeout{SCL-RESULT OK (\the\SCL@nchecks\space checks)}%
+  \fi}
+
+%% \SCLimage{<width>}{<height>}: a framed placeholder
+\newcommand\SCLimage[2]{\fbox{\rule{0pt}{#2}\hspace{#1}}}
+\makeatother
+\endinput
