@@ -1,0 +1,47 @@
+# ctan.toml -- metadata for "ctango upload".
+# Keys follow the CTAN submission API: https://ctan.org/help/submit
+# uploader/email are taken from ~/.config/ctango/config.toml or git config.
+
+pkg         = "subcaptionlite"
+ctanPath    = "/macros/latex/contrib/subcaptionlite"
+summary     = "Subfigures and subcaptions without the caption package"
+description = '''
+<p>
+The subcaption package needs the caption package, which redefines
+<code>\@makecaption</code> of the class; thus it cannot be used with a
+class that has its own design of captions.  This package provides the
+<code>subfigure</code> environment, <code>\subcaption</code> and
+<code>\subcaptionbox</code> without touching <code>\@makecaption</code>
+of the class.
+</p>
+<p>
+Subfigures are numbered (a), (b), ... within each figure, and
+<code>\ref</code> gives e.g. 4.2(a).  The figure number is right
+whether the caption of the figure comes before or after the
+subcaptions.  hyperref and cleveref are supported, and
+<code>\captionsetup</code> is accepted and ignored.  The font and the
+spaces of the subcaptions can be changed by redefining three macros;
+the space after the label is half of the full-width character with
+Japanese classes.
+</p>
+<p>
+Supported formats/engines: <code>pdflatex</code>, <code>xelatex</code>,
+<code>lualatex</code> (with or without LuaTeX-ja), <code>platex</code>,
+<code>uplatex</code> (with <code>dvipdfmx</code>).
+</p>
+'''
+author      = ["Munehiro Yamamoto"]
+license     = ["lppl1.3c"]
+topic       = ["caption", "subfloat"]
+# home        = "https://..."
+bugtracker  = ["https://github.com/munepi/subcaptionlite/issues"]
+# support     = "https://..."
+repository  = ["https://github.com/munepi/subcaptionlite"]
+# development = "https://..."
+
+archive     = "subcaptionlite.zip"  # built by "make ctanzip"
+
+# The version is read from this file (\ProvidesPackage / \ProvidesExplPackage).
+# Add pattern = '...' to use your own regular expression (first group = version).
+[version]
+file        = "subcaptionlite.sty"

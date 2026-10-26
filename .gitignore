@@ -1,0 +1,12 @@
+*.aux
+*.log
+*.out
+*.toc
+*.dvi
+*.xdv
+*.synctex.gz
+*.term
+test-*.pdf
+subcaptionlite.zip
+*~
+.DS_Store
