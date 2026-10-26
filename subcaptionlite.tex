@@ -1,0 +1,203 @@
+%% subcaptionlite.tex -- documentation for the subcaptionlite package
+%%
+%% Copyright (c) 2026 Munehiro Yamamoto <munepixyz@gmail.com>
+%% License: LPPL 1.3c or later
+%%
+%% Build: pdflatex subcaptionlite.tex (twice)
+\documentclass{article}
+\usepackage[margin=28mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{subcaptionlite}
+\usepackage[colorlinks, allcolors=blue!50!black]{hyperref}
+\usepackage[capitalise]{cleveref}
+\newcommand*\sclversion{v1.0 (2026/10/26)}
+\newcommand*\cs[1]{\texttt{\char`\\#1}}
+\newcommand*\pkg[1]{\textsf{#1}}
+\newcommand*\env[1]{\texttt{#1}}
+\newcommand*\meta[1]{\textnormal{$\langle$\textit{#1}$\rangle$}}
+
+\title{The \pkg{subcaptionlite} package\\
+  \large Subfigures and subcaptions without the caption package}
+\author{Munehiro Yamamoto\\
+  \url{https://github.com/munepi/subcaptionlite}}
+\date{\sclversion}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+The \pkg{subcaption} package needs the \pkg{caption} package, which
+redefines \cs{@makecaption} of the class.  Thus it cannot be used with
+a class that has its own design of captions: loading it changes the
+captions of the whole document.
+
+The \pkg{subcaptionlite} package provides the \env{subfigure}
+environment, \cs{subcaption} and \cs{subcaptionbox} with the same
+syntax as \pkg{subcaption}, without touching \cs{@makecaption} of the
+class.  \Cref{fig:example} is made with it.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{.3\linewidth}
+    \centering\includegraphics[width=.9\linewidth]{example-image-a}
+    \caption{The subfigure environment}\label{fig:example-a}
+  \end{subfigure}\hfill
+  \subcaptionbox{\cs{subcaptionbox} with a width\label{fig:example-b}}%
+    [.3\linewidth]{\includegraphics[width=.9\linewidth]{example-image-b}}\hfill
+  \subcaptionbox{\cs{subcaptionbox} without a width\label{fig:example-c}}{%
+    \includegraphics[width=.25\linewidth]{example-image-c}}
+  \caption{Three subfigures}\label{fig:example}
+\end{figure}
+
+\paragraph{Supported formats/engines}
+pdf\LaTeX, Xe\LaTeX, Lua\LaTeX{} (with or without Lua\TeX-ja),
+p\LaTeX{} and up\LaTeX{} (with dvipdfmx).  The package requires
+\LaTeX2e{} 2020-10-01 or later and loads \pkg{etoolbox}.
+
+\section{Usage}
+
+\begin{verbatim}
+\usepackage{subcaptionlite}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{.3\linewidth}
+    \centering\includegraphics[width=.9\linewidth]{example-image-a}
+    \caption{The subfigure environment}\label{fig:example-a}
+  \end{subfigure}\hfill
+  \subcaptionbox{\cs{subcaptionbox} with a width\label{fig:example-b}}%
+    [.3\linewidth]{\includegraphics[width=.9\linewidth]{example-image-b}}\hfill
+  \subcaptionbox{\cs{subcaptionbox} without a width\label{fig:example-c}}{%
+    \includegraphics[width=.25\linewidth]{example-image-c}}
+  \caption{Three subfigures}\label{fig:example}
+\end{figure}
+\end{verbatim}
+
+\begin{description}
+\item[\texttt{\char`\\begin\{subfigure\}[\meta{pos}]\{\meta{width}\}}]
+  A \env{minipage} of \meta{width} (\meta{pos}: \texttt{c} by default),
+  inside which \cs{caption} and \cs{caption*} mean \cs{subcaption} and
+  \cs{subcaption*}.
+\item[\texttt{\char`\\subcaption\{\meta{text}\}}, \texttt{\char`\\subcaption*\{\meta{text}\}}]
+  A numbered or unnumbered subcaption, e.g.\ at the bottom of a
+  \env{minipage}.  It is centered and set in \cs{small}.
+\item[\texttt{\char`\\subcaptionbox\{\meta{caption}\}[\meta{width}]\{\meta{contents}\}}]
+  Puts \meta{contents} centered in a \env{minipage} of \meta{width},
+  followed by \cs{subcaption}\texttt{\{\meta{caption}\}}.  Without
+  \meta{width}, the natural width of \meta{contents} is used.  If
+  \meta{contents} is wider than \meta{width}, the \env{minipage} keeps
+  \meta{width}.  Boxes are aligned at the bottom.
+\item[\texttt{\char`\\captionsetup[\meta{type}]\{\meta{options}\}}]
+  Accepted and ignored, so that the settings for the \pkg{caption}
+  package can be left in the document.
+\end{description}
+
+\paragraph{Numbering and references}
+The counter \texttt{subfigure} is reset by \texttt{figure}.
+\cs{thesubfigure} is \texttt{(\cs{alph}\{subfigure\})} and
+\cs{p@subfigure} is \cs{thefigure}, so that \cs{ref} gives
+``\ref{fig:example-a}'' and \cs{Cref} of \pkg{cleveref} gives
+``\Cref{fig:example-b}''.  With \pkg{hyperref}, each subfigure has its
+own anchor (\cs{theHsubfigure}).
+
+The \cs{caption} of the figure may come after the subcaptions (as in
+\cref{fig:example}) or before them.  When a subcaption comes first, it
+steps the figure counter in advance and the \cs{caption} that follows
+does not step it again, as the \pkg{subcaption} package does; without
+this, the subfigures would get the number of the previous figure.  A
+figure with subcaptions and no \cs{caption} is numbered as well.
+
+\section{Customization}
+
+The following macros can be redefined in the class or in a local style
+(\cs{makeatletter} is needed in the preamble of a document).
+
+\begin{center}
+\begin{tabular}{lp{.55\linewidth}}
+  \hline
+  Macro & Default\\
+  \hline
+  \cs{subcaption@font} & \cs{small}\\
+  \cs{subcaption@sep}  & the space between the label and the text:
+    \verb|\hspace{.5zw}| with p\TeX, \verb|.5\zw| with Lua\TeX-ja (or a
+    class that defines \cs{zw}), \verb|.5em| otherwise\\
+  \cs{subcaption@skip} & the space between the subfigure and its
+    subcaption: \verb|\vskip.25\baselineskip|\\
+  \hline
+\end{tabular}
+\end{center}
+
+\noindent
+The engine is checked when the subcaption is typeset, so Lua\TeX-ja may
+be loaded after \pkg{subcaptionlite}.  The label itself is
+\cs{thesubfigure}.  For example,
+\begin{verbatim}
+\makeatletter
+\renewcommand*\subcaption@font{\footnotesize\sffamily}
+\renewcommand*\subcaption@sep{\enspace}
+\makeatother
+\renewcommand\thesubfigure{\alph{subfigure})}
+\end{verbatim}
+
+\section{Limitations}
+
+\begin{itemize}
+\item Subcaptions are for figures only: there is no subtable.
+\item \pkg{subcaptionlite} cannot be used together with the
+  \pkg{caption} or \pkg{subcaption} package.
+\end{itemize}
+
+\section{Tests}
+
+\verb|make test| compiles the test files twice with pdf\LaTeX,
+Xe\LaTeX, Lua\LaTeX, p\LaTeX{} and up\LaTeX{} (+ dvipdfmx) and checks
+the log.  The helpers in \texttt{test-common.tex} check the label that
+\cs{label} would write, the references, the counters, the widths of
+the boxes, the anchors of \pkg{hyperref}, and that \cs{@makecaption} of
+the class is unchanged; the log must have \texttt{SCL-RESULT OK} and no
+error or warning.
+
+\begin{center}
+\begin{tabular}{lp{.6\linewidth}}
+  \hline
+  Test & What it covers\\
+  \hline
+  \texttt{test-basic.tex}    & \env{subfigure}, \cs{subcaption},
+                               \cs{subcaptionbox}, the caption of the
+                               figure below/above the subfigures or none,
+                               \env{figure*}, \cs{ref}, the label
+                               separator\\
+  \texttt{test-hyperref.tex} & \texttt{test-basic.tex} with
+                               \pkg{hyperref} (loaded after and before
+                               the package) and \pkg{cleveref}\\
+  \texttt{test-japanese.tex} & Japanese classes (ltjsarticle, jsarticle,
+                               ujarticle), Lua\TeX-ja loaded after the
+                               package\\
+  \hline
+\end{tabular}
+\end{center}
+
+\section{History}
+
+\begin{description}
+\item[v1.0 (2026/10/26)] First public release.  Support every engine;
+  fix the figure number when the caption of the figure comes before
+  the subcaptions, and after a figure whose subfigures follow its
+  caption.
+\end{description}
+
+\section{License}
+
+This package is licensed under the conditions of the \LaTeX{} Project
+Public License, either version~1.3c of this license or any later
+version.
+
+\medskip
+\noindent
+Copyright \copyright{} 2026 Munehiro Yamamoto
+
+\end{document}
