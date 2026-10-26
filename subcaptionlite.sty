@@ -1,0 +1,159 @@
+%%
+%% subcaptionlite.sty
+%% ==================
+%% Minimal subfigure environment, \subcaption and \subcaptionbox without
+%% the caption package.
+%%
+%% Copyright (c) 2026 Munehiro Yamamoto <munepixyz@gmail.com>
+%%
+%% This package is licensed under the conditions of the LaTeX Project
+%% Public License, either version 1.3c of this license or (at your
+%% option) any later version.  The latest version of this license is in
+%%   https://www.latex-project.org/lppl.txt
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%% The Current Maintainer of this work is Munehiro Yamamoto.
+%%
+%% What this package does
+%%   The subcaption package needs the caption package, which redefines
+%%   \@makecaption of the class.  Thus it cannot be used with a class
+%%   that has its own design of captions.  This package provides the
+%%   subfigure environment, \subcaption and \subcaptionbox without
+%%   touching \@makecaption of the class; \caption is only wrapped for
+%%   the numbering (see below).
+%%
+%% What it provides
+%%   * The counter subfigure, reset by figure.  \thesubfigure is (a),
+%%     (b), ...; \p@subfigure is \thefigure, so that \ref gives "4.2(a)"
+%%     (and \Cref of cleveref "Figure 4.2(a)").  \label works through
+%%     \refstepcounter (with hyperref, the anchor is \theHsubfigure).
+%%   * \begin{subfigure}[<pos>]{<width>} ... \end{subfigure}
+%%       A minipage, inside which \caption and \caption* mean
+%%       \subcaption and \subcaption*.
+%%   * \subcaption{<text>} and \subcaption*{<text>}
+%%   * \subcaptionbox{<caption>}[<width>]{<contents>}
+%%       Puts <contents> centered in a minipage of <width>, followed by
+%%       \subcaption{<caption>}.  Without <width>, the natural width of
+%%       <contents> is used.  If <contents> is wider than <width>, the
+%%       minipage keeps <width>.
+%%   * \captionsetup[..]{..}: a no-op, so that the settings for the
+%%     caption package can be left in the document.
+%%
+%% Numbering
+%%   When a \subcaption comes before the \caption of its figure (the
+%%   usual way), the first \subcaption steps the figure counter in
+%%   advance, and the \caption that follows does not step it again (as
+%%   the subcaption package does; otherwise the subfigures would get the
+%%   number of the previous figure).  When the \caption comes first, the
+%%   \subcaption uses its number.
+%%
+%% Customization (redefine in the class or a local style)
+%%   \subcaption@font   the font of a subcaption (default: \small)
+%%   \subcaption@sep    the space between the label (a) and the text
+%%                      (default: \hspace{.5zw} with pTeX, .5\zw with
+%%                      LuaTeX-ja and the classes that define \zw,
+%%                      .5em otherwise)
+%%   \subcaption@skip   the space between the subfigure and its
+%%                      subcaption (default: \vskip.25\baselineskip)
+%%
+%% Supported formats/engines
+%%   * pdfLaTeX, XeLaTeX, LuaLaTeX (with or without LuaTeX-ja)
+%%   * pLaTeX, upLaTeX (+ dvipdfmx)
+%%
+%% Limitations
+%%   * Subcaptions are for figures only: there is no subtable.
+%%
+\NeedsTeXFormat{LaTeX2e}[2020-10-01]
+\ProvidesPackage{subcaptionlite}
+  [2026/10/26 v1.0 minimal subfigure/subcaption without the caption package]
+
+\RequirePackage{etoolbox}%% \AtBeginEnvironment
+
+\newbox\subcaption@box
+\newdimen\subcaption@dim
+
+\newcounter{subfigure}[figure]
+\renewcommand{\thesubfigure}{(\alph{subfigure})}
+\def\p@subfigure{\thefigure}
+\def\theHsubfigure{\theHfigure.\arabic{subfigure}}
+
+%% Half of the full-width character: zw is a unit of pTeX; LuaTeX-ja
+%% (and some classes) define \zw.  Decided when used, so that LuaTeX-ja
+%% may be loaded after this package.
+\def\subcaption@halfzw{%
+  \ifdefined\ptexversion .5zw\else\ifdefined\zw .5\zw\else .5em\fi\fi}
+\providecommand*\subcaption@font{\small}
+\providecommand*\subcaption@sep{\hspace{\subcaption@halfzw}}
+\providecommand*\subcaption@skip{\vskip.25\baselineskip}
+
+%% With hyperref, step the figure counter in advance with
+%% \H@refstepcounter, which makes no anchor
+\def\subcaption@precount@figure{%
+  \@ifundefined{H@refstepcounter}{\refstepcounter}{\H@refstepcounter}{\@captype}}
+
+%% precounted: a \subcaption has stepped the figure counter in advance;
+%% captioned:  the \caption of the figure has been given
+\newif\if@subcaption@precounted
+\newif\if@subcaption@captioned
+%% The subfigure counter is reset here too: it is reset by the figure
+%% counter, which is not stepped before the first \subcaption
+\def\subcaption@reset{%
+  \global\@subcaption@precountedfalse
+  \global\@subcaption@captionedfalse
+  \setcounter{subfigure}{0}}
+\AtBeginEnvironment{figure}{\subcaption@reset}
+\AtBeginEnvironment{figure*}{\subcaption@reset}
+\AtBeginEnvironment{table}{\subcaption@reset}
+\AtBeginEnvironment{table*}{\subcaption@reset}
+
+%% \caption is wrapped at the end of \begin{document}, after hyperref and
+%% the like have defined it
+\AddToHook{begindocument/end}{%
+  \let\subcaption@saved@caption\caption
+  \def\caption{%
+    \if@subcaption@precounted
+      \global\@subcaption@precountedfalse
+      \addtocounter{\@captype}{\m@ne}%
+    \fi
+    \global\@subcaption@captionedtrue
+    \subcaption@saved@caption}}
+
+\newcommand*\subcaption{\@ifstar\subcaption@star\subcaption@nostar}
+\newcommand\subcaption@nostar[1]{%
+  \if@subcaption@precounted\else\if@subcaption@captioned\else
+    \global\@subcaption@precountedtrue
+    \subcaption@precount@figure
+  \fi\fi
+  \refstepcounter{subfigure}%
+  \subcaption@typeset{\thesubfigure\subcaption@sep}{#1}}
+\newcommand\subcaption@star[1]{\subcaption@typeset{}{#1}}
+\newcommand\subcaption@typeset[2]{%
+  \par\subcaption@skip
+  {\centering\subcaption@font\ifdefined\inhibitglue\inhibitglue\fi#1#2\par}}
+
+\newenvironment{subfigure}[2][c]{%
+  \begin{minipage}[#1]{#2}%
+    \let\caption\subcaption
+}{\end{minipage}}
+
+%% \subcaptionbox{caption}[width]{contents}
+\NewDocumentCommand\subcaptionbox{ m O{} m }{%
+  \begingroup
+    \setbox\subcaption@box\hbox{#3}%
+    \if\relax\detokenize{#2}\relax
+      \subcaption@dim\wd\subcaption@box
+    \else
+      \subcaption@dim#2\relax
+    \fi
+    \begin{minipage}[b]{\subcaption@dim}%
+      %% put contents in an \hsize-wide hbox, so that the minipage does
+      %% not get wider than its width
+      \hb@xt@\hsize{\hss\box\subcaption@box\hss}\par
+      \subcaption{#1}%
+    \end{minipage}%
+  \endgroup}
+
+%% \captionsetup of the caption package is ignored
+\NewDocumentCommand\captionsetup{ o m }{}
+
+\endinput
