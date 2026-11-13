@@ -12,6 +12,9 @@
 %%   type     \subcaption in a float type without subcaptions (a float
 %%            "listing" defined with \@float):
 %%            "Float type `listing' has no subcaptions"
+%%   continued
+%%            \ContinuedFloat outside a float:
+%%            "\ContinuedFloat outside float"
 \ifdefined\CASE\else\def\CASE{outside}\fi
 \documentclass{article}
 \usepackage{subcaptionlite}
@@ -33,6 +36,9 @@
     \subcaptionbox{In a listing}{Text}
     \caption{A listing}
   \end{listing}
+\fi
+\SCLcase{continued}
+  \ContinuedFloat
 \fi
 Text.
 \end{document}

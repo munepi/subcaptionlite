@@ -13,7 +13,7 @@
 \usepackage{subcaptionlite}
 \usepackage[colorlinks, allcolors=blue!50!black]{hyperref}
 \usepackage[capitalise]{cleveref}
-\newcommand*\sclversion{v1.0 (2026/10/26)}
+\newcommand*\sclversion{v1.1 (2026/11/13)}
 \newcommand*\cs[1]{\texttt{\char`\\#1}}
 \newcommand*\pkg[1]{\textsf{#1}}
 \newcommand*\env[1]{\texttt{#1}}
@@ -134,6 +134,17 @@ p\LaTeX{} and up\LaTeX{} (with dvipdfmx).  The package requires
   (\cs{subref*}: without a link with \pkg{hyperref}).  After a numbered
   subcaption, \cs{label}\texttt{\{\meta{label}\}} also writes the label
   \texttt{sub@\meta{label}}, as the \pkg{subcaption} package does.
+\item[\cs{ContinuedFloat}]
+  At the beginning of a float: the float continues the previous float
+  of the same type, as with the \pkg{caption} package.  It gets the
+  same number, and its subfigures or subtables continue the numbering,
+  e.g.\ (c) and (d) after (a) and (b).  To start from another letter,
+  give \cs{setcounter}\texttt{\{subfigure\}\{\meta{n}\}} right after
+  \cs{ContinuedFloat} (the next subcaption is numbered \meta{n}+1); as
+  in the \pkg{subcaption} package, \cs{setcounter} without
+  \cs{ContinuedFloat} has no effect when the subcaptions come before
+  the \cs{caption}, because the first subcaption steps the counter of
+  the float, which resets the counter of the subfigures.
 \item[\texttt{\char`\\captionsetup[\meta{type}]\{\meta{options}\}}]
   Accepted and ignored, so that the settings for the \pkg{caption}
   package can be left in the document.
@@ -155,7 +166,11 @@ subcaption comes first, it steps the counter of the float in advance
 and the \cs{caption} that follows does not step it again, as the
 \pkg{subcaption} package does; without this, the subfigures would get
 the number of the previous figure.  A float with subcaptions and no
-\cs{caption} is numbered as well.
+\cs{caption} is numbered as well.  In a float with \cs{ContinuedFloat},
+the counter of the float is not stepped at all; with \pkg{hyperref},
+the anchors of the float and its subfloats get the suffix
+\texttt{a}, \texttt{b}, \dots{} (e.g.\ \texttt{figure.2a}), as with the
+\pkg{caption} package.
 
 \section{Customization}
 
@@ -197,9 +212,11 @@ be loaded after \pkg{subcaptionlite}.  The labels themselves are
 \item[\texttt{Float type `\meta{type}' has no subcaptions}] \cs{subcaption}
   (or \cs{subcaptionbox}) is used in a float other than \env{figure}
   and \env{table}, e.g.\ one defined by \pkg{newfloat}.
+\item[\texttt{\char`\\ContinuedFloat outside float}] \cs{ContinuedFloat}
+  is used outside a float; it is ignored.
 \end{description}
 \noindent
-After either error, the subcaption is typeset without a number.
+After the first two errors, the subcaption is typeset without a number.
 
 \begin{itemize}
 \item Subcaptions are for figures and tables only.
@@ -236,6 +253,8 @@ expected error message.
   \texttt{test-japanese.tex} & Japanese classes (ltjsarticle, jsarticle,
                                ujarticle), Lua\TeX-ja loaded after the
                                package\\
+  \texttt{test-continued.tex} & \cs{ContinuedFloat} for figures and
+                               tables, with and without \pkg{hyperref}\\
   \texttt{test-errors.tex}   & the error messages\\
   \hline
 \end{tabular}
@@ -244,6 +263,7 @@ expected error message.
 \section{History}
 
 \begin{description}
+\item[v1.1 (2026/11/13)] Add \cs{ContinuedFloat} (issue \#1).
 \item[v1.0 (2026/10/26)] First public release.  Support every engine;
   add the \env{subtable} environment, subcaptions in tables and
   \cs{subref}; the default position of \env{subfigure} is \texttt{b},

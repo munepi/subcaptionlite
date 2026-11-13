@@ -38,6 +38,8 @@ TESTS := \
   uplatex:test-basic-uplatex:'\def\CLS{ujarticle}\input test-basic' \
   pdflatex:test-hyperref-pdflatex:'\input test-hyperref' \
   pdflatex:test-hyperref-first-pdflatex:'\def\SCLhyperfirst{}\input test-hyperref' \
+  pdflatex:test-continued-pdflatex:'\input test-continued' \
+  pdflatex:test-hyperref-continued-pdflatex:'\def\SCLhyperref{}\input test-continued' \
   xelatex:test-hyperref-xelatex:'\input test-hyperref' \
   lualatex:test-hyperref-lualatex:'\input test-hyperref' \
   platex:test-hyperref-platex:'\def\CLS{jarticle}\input test-hyperref' \
@@ -50,7 +52,8 @@ TESTS := \
 ## "<case>:<error message>" of test-errors.tex (pdflatex)
 ERRORS := \
   outside:"subcaption outside float" \
-  type:"has no subcaptions"
+  type:"has no subcaptions" \
+  continued:"ContinuedFloat outside float"
 
 .PHONY: test
 test:

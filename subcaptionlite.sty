@@ -45,6 +45,12 @@
 %%       Only the label of the subfigure/subtable, e.g. "(a)": after a
 %%       numbered \subcaption, \label{<label>} also writes the label
 %%       sub@<label>, as the subcaption package does.
+%%   * \ContinuedFloat, at the beginning of a float: the float continues
+%%       the previous float of the same type, as with the caption
+%%       package: it gets the same number, and its subfigures/subtables
+%%       continue the numbering, e.g. (c), (d) after (a), (b).
+%%       \setcounter{sub<type>}{<n>} right after it sets the number of
+%%       the next subcaption to <n>+1.
 %%   * \captionsetup[..]{..}: a no-op, so that the settings for the
 %%     caption package can be left in the document.
 %%
@@ -55,12 +61,14 @@
 %%   it again (as the subcaption package does; otherwise the subfigures
 %%   would get the number of the previous figure).  When the \caption
 %%   comes first (the usual way for tables), the \subcaption uses its
-%%   number.
+%%   number.  In a float with \ContinuedFloat, the counter of the float
+%%   is not stepped at all.
 %%
 %% Errors
 %%   \subcaption (and \subcaptionbox) outside a float, or in a float
 %%   other than figure and table: the subcaption is typeset without a
 %%   number.
+%%   \ContinuedFloat outside a float: it is ignored.
 %%
 %% Customization (redefine in the class or a local style)
 %%   \subcaption@font   the font of a subcaption (default: \small)
@@ -82,9 +90,9 @@
 %%
 \NeedsTeXFormat{LaTeX2e}[2020-10-01]
 \ProvidesPackage{subcaptionlite}
-  [2026/10/26 v1.0 minimal subfigures/subtables without the caption package]
+  [2026/11/13 v1.1 minimal subfigures/subtables without the caption package]
 
-\RequirePackage{etoolbox}%% \AtBeginEnvironment
+\RequirePackage{etoolbox}%% \AtBeginEnvironment, \cseappto
 
 \newbox\subcaption@box
 \newdimen\subcaption@dim
@@ -130,9 +138,16 @@
 \newif\if@subcaption@captioned
 %% The counter sub<type> is reset here too: it is reset by the counter
 %% <type>, which is not stepped before the first \subcaption
+%% For \ContinuedFloat, \subcaption@cur@<type> is the value of
+%% sub<type> at the last numbered \subcaption in the current float (a
+%% \caption after the subcaptions resets sub<type>);
+%% \subcaption@last@<type> is that of the previous float
 \def\subcaption@reset#1{%
   \global\@subcaption@precountedfalse
   \global\@subcaption@captionedfalse
+  \global\expandafter\let\csname subcaption@last@#1\expandafter\endcsname
+    \csname subcaption@cur@#1\endcsname
+  \expandafter\gdef\csname subcaption@cur@#1\endcsname{0}%
   \setcounter{sub#1}{0}}
 \@ifundefined{c@figure}{}{\subcaption@declare{figure}}
 \@ifundefined{c@table}{}{\subcaption@declare{table}}
@@ -150,6 +165,54 @@
     \ifx\label\subcaption@label \let\label\subcaption@ORI@label \fi
     \subcaption@saved@caption}}
 
+%% \ContinuedFloat, at the beginning of a float: the float continues
+%% the previous float of the same type (as with the caption package).
+%% The counter of the float is not stepped in this float, so that the
+%% float keeps the number of the previous one and \cl@<type> does not
+%% reset sub<type>; sub<type> continues from the previous float.  The
+%% float is regarded as captioned, so that \subcaption does not step
+%% the counter in advance and \caption does not decrement it.
+\newcommand*\ContinuedFloat{%
+  \ifx\@captype\@undefined
+    \PackageError{subcaptionlite}{\string\ContinuedFloat\space outside float}{%
+      \string\ContinuedFloat\space can be used at the beginning of a
+      float.\MessageBreak
+      It is ignored.}%
+  \else
+    \subcaption@continued
+  \fi}
+\newcount\subcaption@ncont
+\let\subcaption@contof\@empty
+\def\subcaption@continued{%
+  \global\@subcaption@precountedfalse
+  \global\@subcaption@captionedtrue
+  \edef\subcaption@conttype{\@captype}%
+  \let\subcaption@ORI@stepcounter\stepcounter
+  \let\stepcounter\subcaption@stepcounter
+  \@ifundefined{subcaption@last@\@captype}{}{%
+    \setcounter{sub\@captype}{\@nameuse{subcaption@last@\@captype}}%
+    \global\expandafter\let\csname subcaption@cur@\@captype\expandafter\endcsname
+      \csname subcaption@last@\@captype\endcsname}%
+  %% with hyperref, the anchors of the float and its subfloats get the
+  %% suffix a, b, ... (the n-th continuation of the float), as with the
+  %% caption package
+  \edef\reserved@a{\@captype=\number\value{\@captype}}%
+  \ifx\reserved@a\subcaption@contof
+    \global\advance\subcaption@ncont\@ne
+  \else
+    \global\let\subcaption@contof\reserved@a
+    \global\subcaption@ncont\@ne
+  \fi
+  \@ifundefined{theH\@captype}{}{%
+    \cseappto{theH\@captype}{\@alph\subcaption@ncont}}}
+%% \stepcounter that does not step the counter of the continued float
+\def\subcaption@stepcounter#1{%
+  \edef\reserved@a{#1}%
+  \ifx\reserved@a\subcaption@conttype
+  \else
+    \subcaption@ORI@stepcounter{#1}%
+  \fi}
+
 \newcommand*\subcaption{\@ifstar\subcaption@star\subcaption@nostar}
 \newcommand\subcaption@nostar{\subcaption@iftype\subcaption@numbered\subcaption@star}
 \newcommand\subcaption@numbered[1]{%
@@ -158,6 +221,8 @@
     \subcaption@precount
   \fi\fi
   \refstepcounter{sub\@captype}%
+  \expandafter\xdef\csname subcaption@cur@\@captype\endcsname{%
+    \number\value{sub\@captype}}%
   \ifx\label\subcaption@label \else
     \let\subcaption@ORI@label\label
     \let\label\subcaption@label

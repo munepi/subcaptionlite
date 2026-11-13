@@ -63,6 +63,7 @@ Figure~\ref{fig:ab} has two parts, \subref{fig:a} and \subref{fig:b}.
 * `\subcaption{<text>}`, `\subcaption*{<text>}`: a numbered/unnumbered subcaption, e.g. in a minipage. It is numbered with the counter of the float it is in: `subfigure` in a figure, `subtable` in a table.
 * `\subcaptionbox{<caption>}[<width>]{<contents>}`: `<contents>` centered in a minipage of `<width>` (default: the natural width of `<contents>`; with `<width>`, `\linewidth` in `<contents>` is `<width>`), followed by `\subcaption{<caption>}`. The minipage keeps `<width>` even if `<contents>` is wider.
 * `\subref{<label>}`, `\subref*{<label>}`: only the label of the subfigure/subtable, e.g. `(a)` (`\subref*`: without a link with hyperref). After a numbered subcaption, `\label{<label>}` also writes the label `sub@<label>`, as the subcaption package does.
+* `\ContinuedFloat`: at the beginning of a float, the float continues the previous float of the same type, as with the caption package: it gets the same number, and its subfigures/subtables continue the numbering, e.g. `(c)`, `(d)` after `(a)`, `(b)`. `\setcounter{subfigure}{<n>}` right after it makes the next subfigure `<n>+1`. With hyperref, the anchors get the suffix `a`, `b`, ... (e.g. `figure.2a`).
 
 ## Customization
 
@@ -79,6 +80,7 @@ The labels are `\thesubfigure` and `\thesubtable` (default: `(\alph{subfigure})`
 ## Errors and limitations
 
 * `\subcaption` (and `\subcaptionbox`) outside a float, or in a float other than figure and table (e.g. one defined by newfloat), is an error; the subcaption is typeset without a number.
+* `\ContinuedFloat` outside a float is an error; it is ignored.
 * Subcaptions are for figures and tables only.
 * subcaptionlite cannot be used together with the caption or subcaption package.
 
@@ -88,7 +90,7 @@ The labels are `\thesubfigure` and `\thesubtable` (default: `(\alph{subfigure})`
 
 * `SCL-RESULT OK`: every label (`\@currentlabel`), reference, counter, width and anchor checked in the test is as expected (see `test-common.tex`), and `\@makecaption` of the class is unchanged.
 * No error and no LaTeX/package/class warning.
-* `test-hyperref`: no warning on a duplicate or missing destination in the log or in the output of the engine and (x)dvipdfmx.
+* `test-hyperref*`: no warning on a duplicate or missing destination in the log or in the output of the engine and (x)dvipdfmx.
 * `test-errors`: the expected error message.
 
 | Test | Engines | What it covers |
@@ -96,7 +98,8 @@ The labels are `\thesubfigure` and `\thesubtable` (default: `(\alph{subfigure})`
 | `test-basic.tex` | pdflatex, xelatex, lualatex (article, ltjsarticle), platex, uplatex | `subfigure`, `subtable`, `\subcaption`/`\subcaption*`, `\subcaptionbox` (with/without width, wider contents), the caption of the figure/table below/above the subcaptions or none, `figure*`, `\ref`, `\subref`/`\subref*`, `\captionsetup`, the class's `\@makecaption`, the label separator |
 | `test-hyperref.tex` | pdflatex (hyperref loaded after and before the package), xelatex, lualatex, platex, uplatex | `test-basic.tex` with hyperref and cleveref: anchors, the `\cref` type, no duplicate destinations |
 | `test-japanese.tex` | lualatex (ltjsarticle; article with LuaTeX-ja loaded after the package), platex (jsarticle), uplatex (ujarticle) | a Japanese document with subfigures and subtables, the label separator `.5zw` |
-| `test-errors.tex` | pdflatex | the error messages (outside a float, a float type without subcaptions) |
+| `test-continued.tex` | pdflatex (with and without hyperref and cleveref) | `\ContinuedFloat` for figures and tables: the numbers, `\setcounter` after it, the anchors |
+| `test-errors.tex` | pdflatex | the error messages (outside a float, a float type without subcaptions, `\ContinuedFloat` outside a float) |
 
 `test-common.tex` holds the helpers shared by the tests.
 

@@ -1,0 +1,141 @@
+%% test-continued.tex
+%% ==================
+%% Test of \ContinuedFloat: the number of the continued float and of its
+%% subfigures/subtables.
+%%
+%%   pdflatex test-continued.tex   (twice)
+%%   pdflatex -jobname=test-hyperref-continued \
+%%     "\def\SCLhyperref{}\input test-continued"
+%% With \def\SCLhyperref{}, hyperref and cleveref are loaded.
+%%
+%% What is covered:
+%%   * a figure continued twice: the figure number is kept, the
+%%     subfigures continue (c), (d), (e); with hyperref, the anchors get
+%%     the suffix a, b (figure.1a, subfigure.1a.3, ...), as with the
+%%     caption package;
+%%   * the figure after the continued figures gets the next number, and
+%%     its subfigures start from (a);
+%%   * \setcounter{subfigure} right after \ContinuedFloat sets the
+%%     number of the next subfigure (as with the subcaption package);
+%%   * a continued figure of a figure without subfigures starts from
+%%     (a); \setcounter{subfigure} without \ContinuedFloat is reset by
+%%     the first subfigure (as with the subcaption package);
+%%   * a continued table with the caption above the subtables;
+%%   * \ref and \subref to the continued subfigures.
+%%
+%% What to check:
+%%   * SCL-RESULT OK, and no error or warning.
+\documentclass{article}
+\input{test-common}
+\usepackage{subcaptionlite}
+\ifdefined\SCLhyperref
+  \usepackage{hyperref}
+  \usepackage{cleveref}
+\fi
+\newcommand\SCLsub[3][]{%
+  \begin{subfigure}{.3\linewidth}
+    \centering\SCLimage{2cm}{1cm}
+    \caption{#2}#3%
+  \end{subfigure}\hfill}
+\begin{document}
+\section*{Continued figures}
+
+\begin{figure}[htbp]
+  \centering
+  \SCLsub{First}{\SCLlabel{1(a)}\SCLhref{subfigure.1.1}}
+  \SCLsub{Second}{\SCLlabel{1(b)}\SCLhref{subfigure.1.2}}
+  \caption{Figure}\SCLlabel{1}\SCLhref{figure.1}\label{fig:first}
+\end{figure}
+\SCLcounter{figure}{1}
+
+\begin{figure}[htbp]
+  \ContinuedFloat
+  \centering
+  \SCLsub{Third}{\SCLlabel{1(c)}\SCLhref{subfigure.1a.3}\label{fig:first-c}}
+  \SCLsub{Fourth}{\SCLlabel{1(d)}\SCLhref{subfigure.1a.4}}
+  \caption{Figure (continued)}\SCLlabel{1}\SCLhref{figure.1a}%
+  \label{fig:first-cont}
+\end{figure}
+\SCLcounter{figure}{1}
+
+\begin{figure}[htbp]
+  \ContinuedFloat
+  \centering
+  \SCLsub{Fifth}{\SCLlabel{1(e)}\SCLhref{subfigure.1b.5}}
+  \caption{Figure (continued again)}\SCLlabel{1}\SCLhref{figure.1b}
+\end{figure}
+\SCLcounter{figure}{1}
+
+\begin{figure}[htbp]
+  \centering
+  \SCLsub{First}{\SCLlabel{2(a)}\SCLhref{subfigure.2.1}}
+  \caption{Next figure}\SCLlabel{2}\SCLhref{figure.2}
+\end{figure}
+\SCLcounter{figure}{2}
+
+\begin{figure}[htbp]
+  \ContinuedFloat
+  \setcounter{subfigure}{5}%
+  \centering
+  \SCLsub{Sixth}{\SCLlabel{2(f)}\SCLhref{subfigure.2a.6}}
+  \caption{Next figure (continued)}\SCLlabel{2}\SCLhref{figure.2a}
+\end{figure}
+\SCLcounter{figure}{2}
+
+\begin{figure}[htbp]
+  \centering
+  \SCLimage{2cm}{1cm}
+  \caption{Without subfigures}\SCLlabel{3}
+\end{figure}
+
+\begin{figure}[htbp]
+  \ContinuedFloat
+  \centering
+  \SCLsub{First}{\SCLlabel{3(a)}\SCLhref{subfigure.3a.1}}
+  \caption{Without subfigures (continued)}\SCLlabel{3}\SCLhref{figure.3a}
+\end{figure}
+\SCLcounter{figure}{3}
+
+\begin{figure}[htbp]
+  \setcounter{subfigure}{2}%
+  \centering
+  \SCLsub{First}{\SCLlabel{4(a)}}
+  \caption{\texttt{\string\setcounter} without
+    \texttt{\string\ContinuedFloat}}\SCLlabel{4}
+\end{figure}
+\SCLcounter{figure}{4}
+
+\section*{Continued tables}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Table}\SCLlabel{1}\SCLhref{table.1}
+  \subcaptionbox{First\SCLlabel{1(a)}}{A}\hfill
+  \subcaptionbox{Second\SCLlabel{1(b)}}{B}
+\end{table}
+
+\begin{table}[htbp]
+  \ContinuedFloat
+  \centering
+  \caption{Table (continued)}\SCLlabel{1}\SCLhref{table.1a}
+  \SCLcounter{subtable}{2}
+  \subcaptionbox{Third\SCLlabel{1(c)}\SCLhref{subtable.1a.3}}{C}\hfill
+  \subcaptionbox{Fourth\SCLlabel{1(d)}}{D}
+\end{table}
+\SCLcounter{table}{1}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Next table}\SCLlabel{2}
+  \subcaptionbox{First\SCLlabel{2(a)}}{E}
+\end{table}
+\SCLcounter{table}{2}
+\SCLcounter{figure}{4}
+
+\section*{References}
+
+See figure~\ref{fig:first-cont} and subfigure~\ref{fig:first-c}
+(\subref{fig:first-c}).
+\SCLref{fig:first}{1}\SCLref{fig:first-cont}{1}
+\SCLref{fig:first-c}{1(c)}\SCLref{sub@fig:first-c}{(c)}
+\end{document}
